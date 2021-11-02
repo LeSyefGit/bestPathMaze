@@ -1,10 +1,10 @@
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
-#define CLEAR_N(x,n) ((x)&~(1<<(n)))
-#define GET_N(x,n) ((x)>>(n))&1
-#define SET_N(x,n) ((x)|1<<(n))
+#define CLEAR_N(x,i) ((x)&~(1<<(i)))
+#define GET_N(x,i) ((x)>>(i))&1
+#define SET_N(x,i) ((x)|1<<(i))
 
 struct labyrinthe
 {
@@ -34,24 +34,41 @@ void generateLabFull(int row, int col){ // génere un lab plein avec tous les mu
     //printf(s);
 }
 
-void buildCellLab(){ // va casser les murs pour creer le labyrinthe cohérent ( le lab peut ne pas avoir d'acces à la sortie) (la sortie peut etre égale à l'entrée)
 
-}
-
-void generateLab(){ // génere un lab cohérent en cassant aléatoirement les colones et places les entrées et sorties
+void generateLab(int n, int m, unsigned short mat[0][0],char lab[0][0]){ // génere un lab cohérent en cassant aléatoirement les colones et places les entrées et sorties
+    //mat = new unsigned short [n][m];
     
-}
+    for(int i=0; i<n ;i++){
+        for(int j=0; j<m ; j++){
 
-void printlabwallsimple(){  // va interpreter le lab créé et l'afficher (version simple sans afficher les intersections de routes)
+            lab[2*i+1][2*j+1] = (GET_N(mat[i][j],15) ==1) ? '-': ' '; // is part of the final path
 
-}
-void printlabwallfinal(){   //  va afficher le lab créé avec toutes les intersections de routes (version avec les contours)
+            lab[2*i][2*j+1] = (GET_N(mat[i][j],0) == 1) ? '=': ' '; // up
+            lab[2*i+1][2*j+2] = (GET_N(mat[i][j],1) == 1) ? '|': ' '; // right
+            lab[2*i+2][2*j+1] = (GET_N(mat[i][j],2) ==1) ? '=': ' '; // down
+            lab[2*i+1][2*j] = (GET_N(mat[i][j],3) ==1) ? '|': ' '; // left
+
+            lab[2*i][2*j] = '*';                           //up left
+            lab[2*i][2*j+2] = '*';                           //up right
+            lab[2*i+2][2*j+2] = '*';                           //down right
+            lab[2*i+2][2*j] = '*';                          //down left
+        }
+    }   
     
+
 }
 
-void printlabCurrent(){  // va afficher le parcours
-    printlabCurrent();
+void printlabsimple(int n, int m,char lab[0][0]){  // va interpreter le lab créé et l'afficher (version simple sans afficher les intersections de routes)
+    printf("sdfsdf %d , %d\n",n,m);
+    for(int i=0; i< 2*n+1 ;i++){
+        for(int j=0; j< 2*m+1 ; j++){
+                printf("%c",lab[i][j]);
+        }
+        printf("\n");
+    }
+    printf("\n");
 }
+
 
 /// pour charger le fichier contenant les lab
 
@@ -59,7 +76,7 @@ int verifyLab(){  // 1 si le lab est cohérent 0 sinon
     return 0;  // todo 
 }
 
-void readMaze(){ // mettre a jour les différents 
+void readMaze(int tab[6], unsigned short mat[tab[0]][tab[1]],char lab[2*tab[0]+1][2*tab[1]+1]){ // mettre a jour les différents 
     FILE *fp = fopen("mazefile.txt", "r");
     if(fp == NULL) {
         perror("Unable to open file!");
@@ -72,29 +89,27 @@ void readMaze(){ // mettre a jour les différents
     size_t len = 0;
     getline(&line, &len, fp);
     char * token = strtok(line, " ");
-    int tab[6];
+    //int tab[6];
     int i= 0;
    // loop through the string to extract all other tokens
     while( token != NULL ) {
-        printf( " %s\n", token ); //printing each token
+        //printf( " %s\n", token ); //printing each token
         tab[i]= atoi(token);
         token = strtok(NULL, " ");
         i++;
     }
 
-    //int mat[tab[0]][tab[1]];
-    int mat[tab[0]][tab[1]];
-    char* lab[2*tab[0]+1][2*tab[1]+1];
     i=0;
     int j=0;
     while(getline(&line, &len, fp) != -1) {
-        printf("line: %s\n", line);
+        //printf("line: %s\n", line);
         token = strtok(line, " ");
 
         while(token != NULL) {
             mat[i][j]= atoi(token);
             //lab[i][j]= atoi(token);
-            printf("the mat:%d and token: %s\n",mat[i][j],token);
+            //printf("the mat:%d and token: %s\n",mat[i][j],token);
+            //printf("the mat:%s and token: %s\n",matbin[i][j],token);
             token = strtok(NULL, " ");
             
             j++;
@@ -103,26 +118,33 @@ void readMaze(){ // mettre a jour les différents
         i++;
     }
 
-    printf("\n\nMax line size: %zd\n", len);
-
     fclose(fp);
     free(line);
 }
 
-
 int main(int argc, char const *argv[])
 {   
-    unsigned short val = 110;
-    unsigned char c= 185;
-    printf("%016X\n",val);
-    printf("%d\n",val);
-    printf("lmlkg fdsg %c kjfdlkgj\n",c);
-    printf("\u2500\u2501\n");
-    printf("🇧🇴\n");
-    //sprintf("%c%c%c\n", (char)105, (char)213, (char)157);
 
     generateLabFull(10,10);
 
-    readMaze();
+    printf("test to verity %d", SET_N(3,3));
+    printf("test to verity %d", GET_N(3,2));
+    printf("test to verity %d", CLEAR_N(3,1));
+
+
+    int tab[6];
+    unsigned short mat[tab[0]][tab[1]];
+    char lab[2*tab[0]+1][2*tab[1]+1];
+    readMaze(tab,mat,lab);
+    int n = tab[0];
+    int m = tab[1];
+    printf("sdfsdf %d ,d %d\n",n,m);
+    generateLab(n,m,mat,lab);
+    printlabsimple(n,m,lab);
+
+    printf("juset tot sldjf %d",mat[5][6]);
+
+
+    //readMaze();
     return 0;
 }
